@@ -1,1 +1,1 @@
-"""Unit test package for cds_tools."""
+"""Unit test package for transcript_tools."""

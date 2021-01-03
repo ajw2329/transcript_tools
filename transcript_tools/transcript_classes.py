@@ -7,7 +7,7 @@
 ### 	pyranges
 
 import pyranges as pr
-import cds_tools.seq_methods as seq_methods
+import transcript_tools.seq_methods as seq_methods
 
 
 def multi_index(query_list, search_term_list, retain_none = False):
@@ -150,6 +150,8 @@ class Transcript():
 	strand : str
 		Strand ('+' or '-') on which the transcript is encoded (relevant only 
 		when exons are confined to a single strand)
+	cumulative_exon_lengths : tuple
+		Values containing the cumulative lengths of all exons in the transcript.
 
 	seq_dict = seq_methods.import_fasta("../data/GRCh38.primary_assembly.genome.fa.gz") 
 	x = Transcript(seq_dict, (("chr1", 1000000, 1000100, "+"), ("chr1", 1000300, 1000400, "+")))
@@ -238,7 +240,7 @@ class Transcript():
 	def check_exon_positions(self):
 		'''
 		Check whether transcript exons were provided with their
-		position in the transcript. This is not necessary transcripts
+		position in the transcript. This is not necessary  fortranscripts
 		consisting of sequential, non-overlapping exons from the
 		same strand of the same chromosome, but is necessary for
 		unconventional transcripts such as trans-spliced transcripts.
@@ -461,6 +463,10 @@ class Transcript():
 
 		self.create_pyranges()
 
+		## calculate cumulative exon lengths
+
+		self.cumulative_exon_lengths()
+
 
 	def assert_exon_incomplete(self):
 		'''
@@ -492,10 +498,27 @@ class Transcript():
 				candidate_codons = seq_methods.get_non_overlapping_codon_triplets(unbounded_candidate_seq)
 
 
+	def cumulative_exon_lengths(self):
+		'''
+		Calculates the cumulative length of the ordered exons in the transcript.
+		For instance, for a transcript with 5 exons of length 100,
+		self.cumulative_exon_lengths would adopt the value (100, 200, 300, 400, 500).
+		'''
 
+		if not self.exon_complete:
 
+			raise TranscriptCompletionError(
+				"CDS cannot be added to a transcript until Transcript.complete_transcript has been called")
 
+		cumulative_exon_lengths = [0]
 
+		for i, exon in enumerate(self.exons):
+
+			cumulative_exon_lengths.append(exon.length + cumulative_exon_lengths[i])
+
+		del cumulative_exon_lengths[0]
+
+		self.cumulative_exon_lengths = tuple(cumulative_exon_lengths)
 
 
 
@@ -549,7 +572,23 @@ class Transcript():
 		or vice versa, provided it overlaps an exon in the transcript.
 		'''
 
-		pass
+		if direction not in ["GT", "TG"]:
+
+			raise ValueError("direction must be GT (genome-to-transcript) or TG (transcript-to-genome)")
+
+		if not self.exon_complete:
+
+			raise TranscriptCompletionError(
+				"CDS cannot be added to a transcript until Transcript.complete_transcript has been called")
+
+		if direction == "GT":
+
+			exon_index = self.position_in_exons(chrom, start, strand)
+
+			if exon_index is None:
+
+				raise ValueError("Coordinate cannot be converted because it does not overlap ")
+
 
 	def __repr__(self):
 
@@ -687,6 +726,7 @@ class Exon():
 		self.chrom = chrom
 		self.start = start
 		self.end = end
+		self.length = end - start + 1
 		self.strand = strand
 		self.position_in_tx = position_in_tx
 
