@@ -123,19 +123,6 @@ class Transcript():
 
 	Attributes
 	----------
-	require_common_strand : bool
-		Logical indicating whether exons were required to derive from 
-		a common genomic strand upon instantiation. Overwhelmingly
-		this should be the case in biological transcripts.
-	require_common_chrom : bool
-		Logical indicating whether exons were required to derive from
-		a common chromosome upon instantiation. Overwhelmingly this should be the case
-		in biological transcripts. Notable exceptions are fusion
-		transcripts and trans-spliced transcripts.
-	require_non_overlap : bool
-		Logical indicating whether constituent exons should consist of non-overlapping
-		genomic segments upon instantiation. Overwhelmingly this should be the case in
-		biological transcripts.
 	exon_complete : bool
 		Logical indicating whether transcript contains all constituent exons. If false,
 		more exons need to be added, followed by subsequent transcript object processing
@@ -161,9 +148,6 @@ class Transcript():
 		self, 
 		seq_dict = None,
 		exon_tuple = None, 
-		require_common_chrom = True, 
-		require_common_strand = True,
-		require_non_overlap = True,
 		allow_nonstop = False,
 		allowable_start_codons = ["AUG"],
 		allowable_stop_codons = ["TAG", "TGA", "TAA"]):
@@ -174,9 +158,6 @@ class Transcript():
 
 				raise ValueError("A seq_dict must be supplied if exon information is supplied.")
 
-		self.require_common_strand = require_common_strand
-		self.require_common_chrom = require_common_chrom
-		self.require_non_overlap = require_non_overlap
 		self.allow_nonstop = allow_nonstop
 		self.allowable_start_codons = allowable_start_codons
 		self.allowable_stop_codons = allowable_stop_codons
