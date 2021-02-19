@@ -412,17 +412,11 @@ class Transcript():
 
 		self.assert_exon_complete()
 
-		if self.require_common_chrom:
+		self.check_common_chrom()
 
-			self.check_common_chrom()
+		self.check_common_strand()
 
-		if self.require_common_strand:
-
-			self.check_common_strand()
-
-		if self.require_non_overlap:
-
-			self.check_exon_overlap()
+		self.check_exon_overlap()
 
 		## check presence of exon positions
 
@@ -537,15 +531,44 @@ class Transcript():
 
 			return None
 
-	def slice_exons(self, start_chrom, start_strand, start, end_chrom, end_strand, end):
+	def slice_exons(self, chrom, start, end, strand):
 		'''
 		Slices exons bounded by a set of genomic coordinates. Bounding coordinates must
 		occur within transcript exon boundaries.  Exons and exon segments falling outside
 		the boundaries are removed from the returned exon list.
+
+		Parameters
+		----------
+
+		chrom : str
+			Chromosome of the bounding coordinates
+		start : int
+			Leftmost of the bounding coordinates
+		end : int
+			Rightmost of the bounding coordinates
+		strand : str
+			Strand ('+ or '-') pf the bounding coordinates
+
+		Returns
+		-------
+
+		list
+			List of contained exons, with outer exons 'shaved' if the bounding coordinates
+			do not include their entirety.
 		'''
 
-		pass
+		start_contained = self.position_in_exons(chrom, start, strand)
+		end_contained = self.position_in_exons(chrom, end, strand)
 
+		if start_contained and end_contained:
+
+			exon_list = self.exons[start_contained, end_contained+1]
+
+			exon_list[0].start = start
+			exon_list[-1].end = end
+
+		return exon_list
+		
 
 	def convert_gx_to_tx_coords(self, chrom, position, strand, direction = "GT"):
 		'''
