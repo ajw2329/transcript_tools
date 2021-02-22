@@ -49,7 +49,7 @@ def multi_index(query_list, search_term_list, retain_none = False):
 	>>> multi_index(['ATT', 'AGG', 'GGG', 'TAG', 'AAA', 'CCC', 'TAG'], ["TAA", "TAG"])
 	[3]
 
-	>>> multi_index(['ATT', 'AGG', 'GGG', 'TAG', 'AAA', 'CCC', 'TAG'], ["TAA", "TAG"], retain_none = False)
+	>>> multi_index(['ATT', 'AGG', 'GGG', 'TAG', 'AAA', 'CCC', 'TAG'], ["TAA", "TAG"], retain_none = True)
 	[None, 3]	
 	'''
 
@@ -762,5 +762,31 @@ class Exon():
 
 
 class Transcriptome:
+	'''
+	A dictionary of Transcript objects, along with a single
+	pyranges object containing all exons in the transcriptome.
+	A transcriptome can be instantiated by passing a path to
+	a GTF file, or alternatively by passing a list of 
+	transcript objects.
+	'''
 
-	pass
+	def __init__(self):
+
+		pass
+
+	def add_transcript(self, gtf_path = None, transcript_list = None):
+
+		pass
+
+	def create_pyranges(self):
+
+		pass
+
+	def summarize(self):
+
+		pass
+
+	def __repr__(self):
+
+		pass
+
