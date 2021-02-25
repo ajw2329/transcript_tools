@@ -218,6 +218,8 @@ class Transcript():
 			raise TranscriptCompletionError(
 				"Can't add exon to exon-complete transcript.")
 
+
+
 	def check_exon_positions(self):
 		'''
 		Check whether transcript exons were provided with their
@@ -268,13 +270,7 @@ class Transcript():
 
 		else:
 
-			if self.strand == "+":
-
-				self.exons = sorted(self.exons, key = lambda x: x.start)
-
-			else:
-
-				self.exons = sorted(self.exons, key = lambda x: x.start, reverse = True)
+			self.exons = sorted(self.exons, key = lambda x: x.start)
 
 		self.exon_sorted = True
 
@@ -370,6 +366,8 @@ class Transcript():
 
 		self.junctions = tuple(self.junctions)
 
+
+
 	def get_transcript_sequence(self):
 		'''
 		Concatenate exon sequences into transcript sequence
@@ -378,6 +376,7 @@ class Transcript():
 		seqs = [exon.sequence for exon in self.exons]
 
 		self.sequence = "".join(seqs)
+
 
 	def create_pyranges(self):
 		'''
@@ -403,6 +402,7 @@ class Transcript():
 			raise TranscriptCompletionError('Transcript with zero exons cannot be complete.')
 
 		self.exon_complete = True
+
 
 	def complete_transcript(self):
 		'''
@@ -475,9 +475,12 @@ class Transcript():
 
 	def cumulative_exon_lengths(self):
 		'''
-		Calculates the cumulative length of the ordered exons in the transcript.
-		For instance, for a transcript with 5 exons of length 100,
-		self.cumulative_exon_lengths would adopt the value (100, 200, 300, 400, 500).
+		Calculates the cumulative lengths of the ordered exons in the transcript. A
+		the cumulative lengths are stored as a tuple, with a 0 prepended to the beginning
+		of the tuple for convenience in coordinate calculations. The value at a given 
+		index can thereby be interpreted as 'the length up until the start of the exon at
+		the same index'. For instance, for a transcript with 5 exons of length 100,
+		self.cumulative_exon_lengths would adopt the value (0, 100, 200, 300, 400, 500).
 		'''
 
 		if not self.exon_complete:
@@ -490,8 +493,6 @@ class Transcript():
 		for i, exon in enumerate(self.exons):
 
 			cumulative_exon_lengths.append(exon.length + cumulative_exon_lengths[i])
-
-		del cumulative_exon_lengths[0]
 
 		self.cumulative_exon_lengths = tuple(cumulative_exon_lengths)
 
@@ -530,6 +531,7 @@ class Transcript():
 		else:
 
 			return None
+
 
 	def slice_exons(self, chrom, start, end, strand):
 		'''
@@ -570,6 +572,7 @@ class Transcript():
 		return exon_list
 		
 
+
 	def convert_gx_to_tx_coords(self, chrom, position, strand, direction = "GT"):
 		'''
 		Takes a genomic coordinate and converts it to a transcriptomic coordinate,
@@ -591,7 +594,16 @@ class Transcript():
 
 			if exon_index is None:
 
-				raise ValueError("Coordinate cannot be converted because it does not overlap ")
+				raise ValueError("Coordinate cannot be converted because it does not overlap")
+
+			## first get position from the most upstream position with reference to the genome
+			### (i.e. the 'leftmost' position)
+
+			overhang = position - self.exons[exon_index].start
+			position_from_left = overhang + self.cumulative_exon_lengths[exon_index]
+
+			## then adjust if the transcript is in the "-" strand
+
 
 
 	def __repr__(self):
