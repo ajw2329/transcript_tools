@@ -367,6 +367,14 @@ class Transcript():
 		self.junctions = tuple(self.junctions)
 
 
+	def get_transcript_length(self):
+		'''
+		Determine the total length of the 
+		transcript by summing the lengths of the exons
+		'''
+
+		self.transcript_length = sum(exon.length for exon in self.exons)
+
 
 	def get_transcript_sequence(self):
 		'''
@@ -376,6 +384,8 @@ class Transcript():
 		seqs = [exon.sequence for exon in self.exons]
 
 		self.sequence = "".join(seqs)
+
+		assert len(self.sequence) == self.transcript_length
 
 
 	def create_pyranges(self):
@@ -421,6 +431,10 @@ class Transcript():
 		## check presence of exon positions
 
 		self.check_exon_positions()
+
+		## calculate transcript length
+
+		self.get_transcript_length()
 
 		## sort exons
 
@@ -603,6 +617,20 @@ class Transcript():
 			position_from_left = overhang + self.cumulative_exon_lengths[exon_index]
 
 			## then adjust if the transcript is in the "-" strand
+
+			if strand == "-":
+
+				position = self.transcript_length - position_from_left
+
+			else:
+
+				position = position_from_left
+
+			return position
+
+		else:
+
+			pass
 
 
 
