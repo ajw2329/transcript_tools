@@ -373,7 +373,29 @@ class Transcript():
 		transcript by summing the lengths of the exons
 		'''
 
+		if not self.exon_complete:
+
+			raise TranscriptCompletionError(
+				"Can't get meaningful transcript length before the transcript is complete")
+
 		self.transcript_length = sum(exon.length for exon in self.exons)
+
+
+	def get_transcript_boundaries(self):
+		'''
+		Assign transcript genomic start and end as separate atrributes. 
+		"start" and "end" refer to the "leftmost" and "rightmost" 
+		genomic coordinates respectively, not necessarily the 5' and 3'
+		ends of the RNA transcript itself.
+		'''
+
+		if not self.exon_complete:
+
+			raise TranscriptCompletionError(
+				"Can't get transcript boundaries before the transcript is complete")
+
+		self.start = self.exons[0].start
+		self.end = self.exons[-1].end
 
 
 	def get_transcript_sequence(self):
@@ -432,13 +454,17 @@ class Transcript():
 
 		self.check_exon_positions()
 
+		## sort exons
+
+		self.sort_exons()
+
 		## calculate transcript length
 
 		self.get_transcript_length()
 
-		## sort exons
+		## get transcript gx start and end
 
-		self.sort_exons()
+		self.get_transcript_boundaries()
 
 		## get transcript sequences
 
@@ -608,7 +634,7 @@ class Transcript():
 
 			if exon_index is None:
 
-				raise ValueError("Coordinate cannot be converted because it does not overlap")
+				raise ValueError("Coordinate cannot be converted because it does not overlap any exons")
 
 			## first get position from the most upstream position with reference to the genome
 			### (i.e. the 'leftmost' position)
@@ -633,10 +659,14 @@ class Transcript():
 			pass
 
 
-
 	def __repr__(self):
 
-		pass
+		rep_l = ["Chromosome: " + self.chrom,
+				 "Start: " + str(self.start),
+				 "End: " + str(self.end),
+				 "Strand: " + self.strand]
+
+		return("\n".join(rep_l))
 
 
 class CodingTranscript(Transcript):
@@ -755,10 +785,11 @@ class Exon():
 
 	Attributes
 	----------
-	w_ : 1d-array
-		Weights after fitting.
-	errors_ : list
-		Number of misclassifications (updates) in each epoch.
+	chrom
+	start
+	end
+	strand
+	position_in_txt
 	'''
 
 	def __init__(self, chrom, start, end, strand, position_in_tx = None):
