@@ -6,6 +6,9 @@
 ###		rapid intersection of start codons with exons using
 ### 	pyranges
 
+### decide if class should take seq dict as input
+### when an exon is sliced, its sequence should also get sliced - add this code and test it
+
 import pyranges as pr
 import transcript_tools.seq_methods as seq_methods
 
@@ -573,23 +576,26 @@ class Transcript():
 			return None
 
 
-	def slice_exons(self, chrom, start, end, strand):
+	def slice_exons(self, start = None, end = None):
 		'''
-		Slices exons bounded by a set of genomic coordinates. Bounding coordinates must
-		occur within transcript exon boundaries.  Exons and exon segments falling outside
-		the boundaries are removed from the returned exon list.
+		Slices exons bounded by a set of genomic coordinates. Set bounding coordinates must
+		occur within transcript exon boundaries, however, if either start or end is set to
+		none, the bounding occurs only at the provided coordinate.  For instance, if start
+		is provided by end is not, the returned exons will include genomic space from the
+		provided start coordinate until the end of the input exons. At least one bounding
+		coordinate must be provided. Chromosome and strand of the bounding coordinates are
+		assumed to match. Exons and exon segments falling outside the boundaries are removed 
+		from the returned exon list.
 
 		Parameters
 		----------
 
-		chrom : str
-			Chromosome of the bounding coordinates
 		start : int
 			Leftmost of the bounding coordinates
 		end : int
 			Rightmost of the bounding coordinates
-		strand : str
-			Strand ('+ or '-') pf the bounding coordinates
+		unbounded : str
+			Indicates if the 
 
 		Returns
 		-------
@@ -599,10 +605,22 @@ class Transcript():
 			do not include their entirety.
 		'''
 
-		start_contained = self.position_in_exons(chrom, start, strand)
-		end_contained = self.position_in_exons(chrom, end, strand)
+		if start is None and end is None:
 
-		if start_contained and end_contained:
+			raise ValueError(
+				"At least one of 'start' and 'end' must be provided an integer value. Both cannot be 'None'.")
+
+		if start is None:
+
+			start_contained = 0,
+			start = 0
+
+		if end is None:
+
+			end_contained = len(self.exons)
+			end = exon_list[-1].end
+
+		if start_contained is not None and end_contained is not None:
 
 			exon_list = self.exons[start_contained, end_contained+1]
 
@@ -677,6 +695,8 @@ class CodingTranscript(Transcript):
 	def __init__(
 		self, 
 		transcript, 
+		cds_g_start,
+		cds_g_end,
 		cds_tx_start, 
 		cds_tx_end,
 		nmd_threshold = 55):
@@ -693,7 +713,8 @@ class CodingTranscript(Transcript):
 		constitute the 5'-UTR. 
 		'''
 
-		pass
+		self.five_utr_exons = self.slice_exons(end = cds_g_start)
+
 
 	def get_three_utr_exons(self):
 		'''
@@ -701,7 +722,8 @@ class CodingTranscript(Transcript):
 		constitute the 3'-UTR. 
 		'''
 
-		pass
+		self.three_utr_exons = self.slice_exons(start = cds_g_end)
+
 
 	def get_coding_exons(self):
 		'''
@@ -709,7 +731,8 @@ class CodingTranscript(Transcript):
 		constitute the coding region.
 		'''
 
-		pass
+		self.coding_exons = self.slice_exons(start = cds_g_start, end = cds_g_end)
+
 
 	def get_five_utr_seq(self):
 		'''
