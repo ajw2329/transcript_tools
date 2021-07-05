@@ -827,6 +827,7 @@ class Exon():
 		self.length = end - start + 1
 		self.strand = strand
 		self.position_in_tx = position_in_tx
+		self.sequence = None
 
 	def get_seq(self, seq_dict):
 		'''
@@ -843,6 +844,71 @@ class Exon():
 		elif self.strand == "-":
 
 			self.sequence = seq_methods.gen_rev_comp(seq)
+
+
+	def alter_boundaries(self, new_start = None, new_end = None):
+		'''
+		Alters the start or end coordinate of the exon, and alters the sequence,
+		if available, appropriately. One or both boundaries can be replaced,
+		but they must be within the oroginal boundaries.
+
+		Parameters
+		----------
+
+		new_start : int
+			New start coordinate -- must be >= original start and <= original end
+		new_end : int
+			New end coordinate -- must be >= original start and  <= original end
+		'''
+
+		alter = False
+
+		if new_start is not None:
+
+			if self.start <= new_start <= self.end:
+
+				alter = True
+
+				slice_start_coord = new_start - self.start
+
+			else:
+
+				raise ValueError("New boundaries must be within old boundaries.")
+
+		else:
+
+			new_start = self.start
+			slice_start_coord = 0
+
+
+		if new_end is not None:
+
+			if self.start <= new_end <= self.end:
+
+				alter = True
+
+				slice_end_coord = new_end - self.start
+
+			else:
+
+				raise ValueError("New boundaries must be within old boundaries.")
+
+		else:
+
+			new_end = self.end
+			slice_end_coord = None
+
+
+		if alter:
+
+			self.start = new_start
+			self.end = new_end
+
+
+			if self.sequence is not None:
+
+				self.sequence = self.sequence[slice_start_coord, slice_end_coord]
+
 
 
 	def __repr__(self):

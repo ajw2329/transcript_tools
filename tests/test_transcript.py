@@ -60,9 +60,9 @@ def toy_transcript_minus():
 def test_exon_plus_basic_attributes(toy_exon_plus):
 
 	assert toy_exon_plus.chrom == "chr1"
-	#assert toy_exon_plus.start == 30
-	#assert toy_exon_plus.end == 40
-	#assert toy_exon_plus.strand == "+"
+	assert toy_exon_plus.start == 30
+	assert toy_exon_plus.end == 40
+	assert toy_exon_plus.strand == "+"
 
 def test_exon_plus_length(toy_exon_plus):
 
@@ -75,6 +75,22 @@ def test_exon_plus_sequence(toy_exon_plus):
 	toy_exon_plus.get_seq(seq_dict)
 
 	assert toy_exon_plus.sequence == "ACAAGGACCCA"
+
+
+
+def test_exon_plus_boundary_alteration(toy_exon_plus):
+
+	seq_dict = {"chr1": "ATAGCAGTAGACAGAGAGGCAGACCCACGACAAGGACCCAGATTAGCAGACCCAGACAGGGGCTATTTACCGA"}
+
+	toy_exon_plus.get_seq(seq_dict)
+
+	toy_exon_plus.alter_boundaries(32,38)
+
+	assert toy_exon_plus.chrom = "chr1"
+	assert toy_exon_plus.start = 32
+	assert toy_exon_plus.end = 38
+	assert toy_exon_plus.strand = "+"
+	assert toy_exon_plus.sequence = "AGGACC"
 
 
 def test_exon_minus_basic_attributes(toy_exon_minus):
