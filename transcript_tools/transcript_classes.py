@@ -483,7 +483,7 @@ class Transcript():
 
 		## calculate cumulative exon lengths
 
-		self.cumulative_exon_lengths()
+		self.calc_cumulative_exon_lengths()
 
 
 	def assert_exon_incomplete(self):
@@ -516,7 +516,7 @@ class Transcript():
 				candidate_codons = seq_methods.get_non_overlapping_codon_triplets(unbounded_candidate_seq)
 
 
-	def cumulative_exon_lengths(self):
+	def calc_cumulative_exon_lengths(self):
 		'''
 		Calculates the cumulative lengths of the ordered exons in the transcript. A
 		the cumulative lengths are stored as a tuple, with a 0 prepended to the beginning
@@ -624,8 +624,8 @@ class Transcript():
 
 			exon_list = self.exons[start_contained, end_contained+1]
 
-			exon_list[0].start = start
-			exon_list[-1].end = end
+			exon_list[0].alter_boundaries(new_start = start)
+			exon_list[-1].alter_boundaries(new_end = end)
 
 		return exon_list
 		
@@ -739,21 +739,21 @@ class CodingTranscript(Transcript):
 		Recovers the sequence of the 5'-UTR.
 		'''
 
-		pass
+		self.five_utr_seq = "".join([i.sequence for i in self.five_utr_exons])
 
 	def get_three_utr_seq(self):
 		'''
 		Recovers the sequence of the 3'-UTR
 		'''
 
-		pass
+		self.three_utr_seq = "".join([i.sequence for i in self.three_utr_exons])
 
 	def get_coding_seq(self):
 		'''
 		Recovers the sequence of the coding region.
 		'''
 
-		pass
+		self.coding_seq = "".join([i.sequence for i in self.coding_exons])
 
 	def translate(self):
 		'''
