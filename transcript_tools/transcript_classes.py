@@ -907,7 +907,7 @@ class Exon():
 
 			if self.sequence is not None:
 
-				self.sequence = self.sequence[slice_start_coord, slice_end_coord]
+				self.sequence = self.sequence[slice_start_coord:slice_end_coord + 1]
 
 
 

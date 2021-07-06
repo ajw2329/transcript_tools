@@ -86,11 +86,11 @@ def test_exon_plus_boundary_alteration(toy_exon_plus):
 
 	toy_exon_plus.alter_boundaries(32,38)
 
-	assert toy_exon_plus.chrom = "chr1"
-	assert toy_exon_plus.start = 32
-	assert toy_exon_plus.end = 38
-	assert toy_exon_plus.strand = "+"
-	assert toy_exon_plus.sequence = "AGGACC"
+	assert toy_exon_plus.chrom == "chr1"
+	assert toy_exon_plus.start == 32
+	assert toy_exon_plus.end == 38
+	assert toy_exon_plus.strand == "+"
+	assert toy_exon_plus.sequence == "AAGGACC"
 
 
 def test_exon_minus_basic_attributes(toy_exon_minus):
